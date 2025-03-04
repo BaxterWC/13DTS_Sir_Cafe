@@ -6,17 +6,18 @@
 
 {% block main %}
     <div class="products">
-        <div class="product-box">
-            <h3 class="product-box-heading"> Espresso </h3>
-            <img src="static/images/espresso.jpg" class="product-box-image">
-            <p class="product-box-info"> A small, sharp coffee </p>
-        </div>
+    {%  for coffee in list_of_coffees %}
+            <div class="product-box">
+                <h3 class="product-box-heading">  </h3>
+                <img src="static/images/espresso.jpg" class="product-box-image">
+                <p class="product-box-info"> A small, sharp coffee </p>
+            </div>
 
-        <div class="product-box">
-            <h3 class="product-box-heading"> Flat White </h3>
-            <img src="static/images/flatwhite.jpg" class="product-box-image">
-            <p class="product-box-info"> A milky delight.  </p>
-        </div>
+            <div class="product-box">
+                <h3 class="product-box-heading"> Flat White </h3>
+                <img src="static/images/flatwhite.jpg" class="product-box-image">
+                <p class="product-box-info"> A milky delight.  </p>
+            </div>
     </div>
 
 {% endblock %}
