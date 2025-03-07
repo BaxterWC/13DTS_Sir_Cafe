@@ -1,23 +1,28 @@
 {% extends 'base.html' %}
 
 {% block pageheading %}
-<h3> Hi Menu fans </h3>
+menu
+    <p> Welcome menu fans </p>
+    <div class="categories">
+        {% for cat in list_of_categories %}
+            <li> <a href="/menu/{{ cat[0] }},"> {{ cat[1] }} </a> </li>
+        {% endfor %}
+    </div>
+
 {% endblock %}
 
 {% block main %}
     <div class="products">
-    {%  for coffee in list_of_coffees %}
+        {%  for coffee in list_of_coffees %}
             <div class="product-box">
-                <h3 class="product-box-heading">  </h3>
-                <img src="static/images/espresso.jpg" class="product-box-image">
-                <p class="product-box-info"> A small, sharp coffee </p>
+                <h3 class="product-box-heading"> {{ coffee[0] }} </h3>
+                <p class="product-box-info"> {{ coffee[1] }} </p>`
+                <img src="/static/images/{{ coffee[3] }}.jpg" >
+                <p> <strong> Size: </strong> {{ coffee[2] }} </p>
+                <p> <strong> Price: </strong> {{ coffee[4] }} </p>
             </div>
+        {% endfor %}
 
-            <div class="product-box">
-                <h3 class="product-box-heading"> Flat White </h3>
-                <img src="static/images/flatwhite.jpg" class="product-box-image">
-                <p class="product-box-info"> A milky delight.  </p>
-            </div>
     </div>
 
 {% endblock %}
