@@ -1,7 +1,15 @@
 {% extends "base.html" %}
 
-{% block pageheading %}welcome{% endblock %}
+{% block pageheading %}
+    {% if user_name %}
+        <br>Welcome, {{  user_name }}!
+    {% else %}
+        <br>Welcome to Smile Café! Please log in.
+    {%  endif %}
+{% endblock %}
 
 {% block main %}
-<strong><em>Hello World</em></strong>
+    <div style="text-align: center">
+        </br> <img src="/static/images/hc.jpg" >
+    </div>
 {% endblock %}

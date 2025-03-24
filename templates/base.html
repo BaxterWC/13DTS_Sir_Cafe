@@ -15,10 +15,18 @@
     <div class="container">
         <div class="navbar-brand">smile.</div>
         <div class="navbar-links">
-            <a href="/">home</a>
-            <a href="/menu/1">menu</a>
-            <a href="/contact">contact</a>
-            <a href="/about">about</a>
+            <a href="/">Home</a>
+            <a href="/menu/1">Menu</a>
+            <a href="/contact">Contact</a>
+            <a href="/about">About</a>
+            {% if session['user_id'] %}
+                <a href="/logout">Log Out</a>
+            {% else %}
+                <a href="/login">Log In</a>
+            {% endif %}
+            {% if session['role'] == 'Admin' %}
+                <a href="/admin">Admin</a>
+            {% endif %}
         </div>
     </div>
 </nav>

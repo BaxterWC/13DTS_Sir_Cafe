@@ -1,10 +1,13 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect, session
 import sqlite3
 from sqlite3 import Error
+from flask_bcrypt import Bcrypt
 
 DATABASE = 'cafe_fr'
-app = Flask(__name__)
 
+app = Flask(__name__)
+bcrypt = Bcrypt(app)
+app.secret_key = "secret_key"
 
 def connect_to_database(db_file):
     try:
@@ -17,7 +20,20 @@ def connect_to_database(db_file):
 
 @app.route('/')
 def render_home():  # put application's code here
-    return render_template('home.html')
+    user_name = None
+
+    if 'user_id' in session:
+        con = connect_to_database(DATABASE)
+        cur = con.cursor()
+        query = "SELECT fname FROM user WHERE user_id = ?"
+        cur.execute(query, (session['user_id'],))
+        guy = cur.fetchone()
+        con.close()
+
+        if guy:
+            user_name = guy[0]
+
+    return render_template('home.html', user_name=user_name)
 
 
 @app.route('/menu/<cat_id>')
@@ -45,6 +61,71 @@ def render_contact():  # put application's code here
 def render_about():  # put application's code here
     return render_template('about.html')
 
+
+@app.route('/login', methods=['POST', 'GET'])
+def render_login_page():
+    if request.method == 'POST':
+        email = request.form.get('user_email').lower().strip()
+        password = request.form.get('user_password')
+
+        con = connect_to_database(DATABASE)
+        if con:
+            cur = con.cursor()
+            query = "SELECT user_id, email, password, fname, role FROM user WHERE email = ?"
+            cur.execute(query, (email,))
+            user_info = cur.fetchone()
+            con.close()
+
+            if user_info:
+
+                if bcrypt.check_password_hash(user_info[2], password):
+                    session['user_id'] = user_info[0]
+                    session['email'] = user_info[1]
+                    session['fname'] = user_info[3]
+                    session['role'] = user_info[4]
+                    return redirect("/")
+
+        return redirect("\login?error=invalid+credentials")
+
+    return render_template('login.html')
+
+
+@app.route('/signup', methods=['POST', 'GET'])
+def render_signup():  # put application's code here
+    if request.method == 'POST':
+        fname = request.form.get('user_fname').title().strip()
+        lname = request.form.get('user_lname').title().strip()
+        email = request.form.get('user_email').lower().strip()
+        password = request.form.get('user_password')
+        password2 = request.form.get('user_password2')
+        role = request.form.get('user_role')
+
+        if password != password2:
+            return redirect("\signup?error=passwords+do+not+match")
+
+        if len(password) < 8:
+            return redirect("\signup?error=password+is+too+short")
+
+        hashed_password = bcrypt.generate_password_hash(password)
+
+        con = connect_to_database(DATABASE)
+        quer_insert = "INSERT INTO user(fname, lname, email, password, role) VALUES (?, ?, ?, ?, ?)"
+        cur = con.cursor()
+        query1 = "SELECT email FROM user"
+        cur.execute(query1)
+        all_emails = cur.fetchall()
+        if (email,) in all_emails:
+            return redirect("\signup?error=email+already+in+use")
+        cur.execute(quer_insert, (fname, lname, email, hashed_password, role))
+        con.commit()
+        con.close()
+
+    return render_template('signup.html')
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect("/")
 
 if __name__ == '__main__':
     app.run()
