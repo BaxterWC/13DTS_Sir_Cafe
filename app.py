@@ -57,6 +57,11 @@ def render_contact():  # put application's code here
     return render_template('contact.html')
 
 
+@app.route('/admin')
+def render_admin():  # put application's code here
+    return render_template('admin.html')
+
+
 @app.route('/about')
 def render_about():  # put application's code here
     return render_template('about.html')
