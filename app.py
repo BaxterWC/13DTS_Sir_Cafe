@@ -9,6 +9,14 @@ app = Flask(__name__)
 bcrypt = Bcrypt(app)
 app.secret_key = "secret_key"
 
+def is_logged_in():
+    if session.get('user_id') is None:
+        print("Not logged in")
+        return False
+    else:
+        print("logged in")
+        return True
+
 def connect_to_database(db_file):
     try:
         connection = sqlite3.connect(db_file)
@@ -131,6 +139,55 @@ def render_signup():  # put application's code here
 def logout():
     session.clear()
     return redirect("/")
+
+
+@app.route('/add_category', methods=['POST', 'GET'])
+def add_category():
+    if not is_logged_in():
+        return redirect("/?message=not+logged+in")
+    if request.method == 'POST':
+        cat_name = request.form.get('cat_name')
+        con = connect_to_database(DATABASE)
+        query_insert = 'INSERT INTO categories (cat_name) VALUES (?)'
+        cur = con.cursor()
+        cur.execute(query_insert, (cat_name,))
+        con.commit()
+        con.close()
+    return render_template('admin.html', logged_in=is_logged_in())
+
+
+@app.route('/delete_category', methods=['POST', 'GET'])
+def delete_category():
+    if not is_logged_in():
+        return redirect("/?message=not+logged+in")
+    if request.method == 'POST':
+        category = request.form.get('select_cat')
+        print(category)
+
+        category = category.strip('(')
+        category = category.strip(')')
+        category = category.split(', ')
+
+        cat_id = category[0]
+        cat_name = category[1]
+        print(f"cat_id = {cat_id} and cat_name = {cat_name}")
+        return render_template('delete_confirm.html', cat_id=cat_id, name=cat_name, type="category")
+    return redirect("/admin", logged_in=is_logged_in())
+
+@app.route('/delete_confirm/<cat_id>')
+def delete_confirm(cat_id):
+    if not is_logged_in():
+        return redirect("/?message=not+logged+in")
+    con = connect_to_database(DATABASE)
+    print(f'deleting {cat_id} from categories table')
+
+    query = 'DELETE FROM categories WHERE cat_id=?'
+    cur = con.cursor()
+    cur.execute(query, (cat_id,))
+    con.commit()
+    con.close()
+    return redirect('/admin')
+
 
 if __name__ == '__main__':
     app.run()
